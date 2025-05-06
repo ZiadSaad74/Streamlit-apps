@@ -1,7 +1,8 @@
 streamlit
 plotly
+nltk
 sklearn==1.2.2
 joblib==1.4.2
-nltk
-pandas
-numpy
+nltk==3.9.1
+pandas==2.2.3
+numpy==1.26.4
