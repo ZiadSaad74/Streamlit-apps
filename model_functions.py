@@ -2,7 +2,6 @@ import joblib
 import string
 import nltk
 from nltk.corpus import stopwords
-import pickle
 import re
 from langchain_fireworks import ChatFireworks
 from langchain_core.messages import HumanMessage, SystemMessage
@@ -124,6 +123,7 @@ nltk.download('stopwords')
 stop_words = set(stopwords.words('english'))
 
 def clean_text(text):
+
     text = str(text)
     text = text.strip()
     text = text.lower()  

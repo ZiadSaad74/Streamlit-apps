@@ -1,7 +1,6 @@
 import streamlit as st
 import joblib
-import numpy
-from model_functions import clean_text, ask_llm, job_descriptions, stop_words
+from model_functions import clean_text, ask_llm, job_descriptions, stop_words, joblib
 import datetime
 import pandas as pd
 import os
