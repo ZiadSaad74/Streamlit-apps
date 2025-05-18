@@ -45,7 +45,7 @@ with st.form("intern_form"):
 
 if submit:
     if not all([name, dob, education_status, major, job_title, selected_course]):
-        st.error("❗ Please fill in all required fields.")
+        st.error("⚠️ All fields are required.")
     else:
         cleaned_title = clean_text(job_title)
         job_title_vector = vectorizer.transform([cleaned_title])
@@ -53,7 +53,7 @@ if submit:
         llm_result = ask_llm(job_title, job_descriptions)
 
         st.markdown("---")
-        st.subheader("🧠 Prediction Result")
+        st.subheader("### 📋 Result Summary")
 
         if prediction.lower() == selected_course.lower():
             st.success(f"✅ Matched! Your job title fits the selected program: **{selected_course}**.")
