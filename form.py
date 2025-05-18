@@ -64,20 +64,20 @@ if submit:
 
         st.markdown(f"💡 AI courses Suggestion: **{llm_result}**")
 
-        try:
-            scopes = ["https://www.googleapis.com/auth/spreadsheets"]
-            creds = Credentials.from_service_account_file("focal-welder-386600-6c0e72884204.json", scopes=scopes) 
-            client = gspread.authorize(creds)
-            sheet = client.open("interns").sheet1
+        # try:
+        #     scopes = ["https://www.googleapis.com/auth/spreadsheets"]
+        #     creds = Credentials.from_service_account_file("focal-welder-386600-6c0e72884204.json", scopes=scopes) 
+        #     client = gspread.authorize(creds)
+        #     sheet = client.open("interns").sheet1
 
-            if len(sheet.get_all_values()) == 0:
-                sheet.insert_row(["Registration Date", "Name", "DOB", "Education Status", "Major", "Job Title", "Selected Course", "Prediction", "LLM Result"], 1)
+        #     if len(sheet.get_all_values()) == 0:
+        #         sheet.insert_row(["Registration Date", "Name", "DOB", "Education Status", "Major", "Job Title", "Selected Course", "Prediction", "LLM Result"], 1)
 
-            sheet.append_row([
-                str(datetime.date.today()), name, str(dob), education_status, major,
-                job_title, selected_course, prediction, llm_result
-            ])
+        #     sheet.append_row([
+        #         str(datetime.date.today()), name, str(dob), education_status, major,
+        #         job_title, selected_course, prediction, llm_result
+        #     ])
 
-            st.success("✅ Your data has been saved successfully!")
-        except Exception as e:
-            st.error(f"Error saving to Google Sheet: {e}")
+        #     st.success("✅ Your data has been saved successfully!")
+        # except Exception as e:
+        #     st.error(f"Error saving to Google Sheet: {e}")
