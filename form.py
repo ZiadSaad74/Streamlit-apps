@@ -62,7 +62,9 @@ if submit:
         else:
             st.info(f"🔎 Not matched with selected course. But model suggests: **{prediction}**")
 
-        st.markdown(f"💡 AI courses Suggestion: **{llm_result}**")
+        st.markdown("### 🤖 AI courses Suggestion")
+        result = ask_llm(original_job_title, job_descriptions)
+        st.info(f"**Suggested Course (via AI):** {result}")
 
         # try:
         #     scopes = ["https://www.googleapis.com/auth/spreadsheets"]
