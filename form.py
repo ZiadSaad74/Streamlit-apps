@@ -66,7 +66,7 @@ if submit:
 
         try:
             scopes = ["https://www.googleapis.com/auth/spreadsheets"]
-            creds = Credentials.from_service_account_file("focal-welder-386600-55fd36951c74.json", scopes=scopes) 
+            creds = Credentials.from_service_account_file("focal-welder-386600-6c0e72884204.json", scopes=scopes) 
             client = gspread.authorize(creds)
             sheet = client.open("interns").sheet1
 
