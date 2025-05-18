@@ -1,9 +1,8 @@
 import streamlit as st
 import joblib
-from model_functions import clean_text, ask_llm, job_descriptions, stop_words, joblib
+from model_functions import clean_text, ask_llm, job_descriptions, stop_words
 import datetime
 import pandas as pd
-import os
 
 model = joblib.load("model.pkl")  
 vectorizer = joblib.load("vec.pkl")  
@@ -55,29 +54,29 @@ if submit:
     result = ask_llm(original_job_title,job_descriptions)
     st.success(f"Matched Course: {result}")
 
-    data_to_save = {
-    "Registeration date": [datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")],
-    "Name": [name],
-    "Age": [datetime.date.today().year - age.year],
-    "Education level": [education_status],
-    "Job Title": [original_job_title],
-    "Major": [major],
-    "Selected program": [selected_course],
-    "Best program": [prediction],
-    "Best course": [result]}
+    # data_to_save = {
+    # "Registeration date": [datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")],
+    # "Name": [name],
+    # "Age": [datetime.date.today().year - age.year],
+    # "Education level": [education_status],
+    # "Job Title": [original_job_title],
+    # "Major": [major],
+    # "Selected program": [selected_course],
+    # "Best program": [prediction],
+    # "Best course": [result]}
 
-    df_new = pd.DataFrame(data_to_save)
+    # df_new = pd.DataFrame(data_to_save)
 
-    file_path = "submissions.xlsx"
+    # file_path = "submissions.xlsx"
 
-    if os.path.exists(file_path) and os.path.getsize(file_path) > 0:
-        try:
-            df_existing = pd.read_excel(file_path)
-        except Exception as e:
-            st.warning(f"Warning reading existing Excel: {e}")
-            df_existing = pd.DataFrame()
-    else:
-        df_existing = pd.DataFrame()
+    # if os.path.exists(file_path) and os.path.getsize(file_path) > 0:
+    #     try:
+    #         df_existing = pd.read_excel(file_path)
+    #     except Exception as e:
+    #         st.warning(f"Warning reading existing Excel: {e}")
+    #         df_existing = pd.DataFrame()
+    # else:
+    #     df_existing = pd.DataFrame()
 
-    df_combined = pd.concat([df_existing, df_new], ignore_index=True)
-    df_combined.to_csv(file_path, index=False)
+    # df_combined = pd.concat([df_existing, df_new], ignore_index=True)
+    # df_combined.to_csv(file_path, index=False)

@@ -1,4 +1,3 @@
-import joblib
 import string
 import nltk
 from nltk.corpus import stopwords
@@ -6,6 +5,8 @@ import re
 from langchain_fireworks import ChatFireworks
 from langchain_core.messages import HumanMessage, SystemMessage
 import json
+import logging
+import tiktoken
 
 job_descriptions = {
     "AI in Healthcare": "Drives AI for healthcare, builds models, analyzes data, ensures compliance. with Skills Python, ML, healthcare knowledge.",
@@ -67,7 +68,20 @@ job_descriptions = {
 
 def ask_llm(title, courses):
 
-    if not isinstance(title,str) or not title.strip():
+    logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+    logger = logging.getLogger(__name__)
+
+    def count_tokens(text, model="accounts/fireworks/models/llama4-maverick-instruct-basic"):
+        try:    
+            # encoding = tiktoken.encoding_for_model(model)
+            encoding = tiktoken.get_encoding("cl100k_base")
+            return len(encoding.encode(text))
+        except:
+
+            encoding = tiktoken.get_encoding("cl100k_base")
+            return len(encoding.encode(text))
+
+    if not isinstance(title, str) or not title.strip():
         return "Not match"
     
     else:
@@ -81,8 +95,12 @@ def ask_llm(title, courses):
         "additionalProperties": False}
 
         model = ChatFireworks(
-            model="accounts/fireworks/models/llama4-maverick-instruct-basic",temperature=0.1,
-            max_tokens=100, fireworks_api_key="fw_3ZTtMu8yiAV962ddVBRTHBAD",top_p=0.3, top_k=3,)
+            model="accounts/fireworks/models/llama4-maverick-instruct-basic",
+            temperature=0.1,
+            max_tokens=100, 
+            fireworks_api_key="fw_3ZTtMu8yiAV962ddVBRTHBAD",
+            top_p=0.3, 
+            top_k=3,)
 
         prompt = f"""
         You are a recommendation system. Your task is to return the most suitable course from a provided list based on a job title.
@@ -107,18 +125,34 @@ def ask_llm(title, courses):
 
         json_model = model.bind(response_format={"type": "json_object", "schema": schema})
         chat_history = [SystemMessage(content=prompt), HumanMessage(content=title)]
+        
+        system_tokens = count_tokens(prompt)
+        human_tokens = count_tokens(title)
+        total_input_tokens = system_tokens + human_tokens
+        
+        logger.info(f"INPUT TOKENS: {total_input_tokens} (System: {system_tokens}, Human: {human_tokens})")
+        logger.info(f"System prompt: {prompt}")
+        logger.info(f"Human message: {title}")
 
         try:
             response = json_model.invoke(chat_history)
             content = response.content.strip()
-
+            
+            output_tokens = count_tokens(content)
+            logger.info(f"OUTPUT TOKENS: {output_tokens}")
+            
             parsed = json.loads(content)
             course_name = parsed.get("output", "Not match")
+            
+            logger.info(f"TOTAL TOKENS: {total_input_tokens + output_tokens} (Input: {total_input_tokens}, Output: {output_tokens})")
+            logger.info(f"MATCHED COURSE: {course_name}")
+            
             return course_name
 
         except Exception as e:
+            logger.error(f"ERROR: {str(e)}")
             return "Not match"
-
+        
 nltk.download('stopwords')
 stop_words = set(stopwords.words('english'))
 

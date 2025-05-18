@@ -28,19 +28,20 @@ def clean_text(text):
     tokens = [word for word in tokens if word not in stop_words]
     return " ".join(tokens)
 
-print('1')
 x_train = x_train.apply(clean_text)
 
 vectorizer = TfidfVectorizer(ngram_range=(1, 2), max_df=0.95, min_df=2, max_features=10000)
 X = vectorizer.fit_transform(x_train)
-print('2')
 
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.10, random_state=42)
 
 model = RandomForestClassifier(n_estimators=400, random_state=42, n_jobs=-1)
 cv_results = cross_validate(model,X_train, y_train, cv=15, return_estimator=True, scoring='accuracy')
+print(cv_results)
 
 best_idx = np.argmax(cv_results['test_score'])
+print("Best idx is:", best_idx)
+
 best_model = cv_results['estimator'][best_idx]
 
 model.fit(X_train, y_train)
@@ -52,3 +53,4 @@ print(classification_report(y_test, y_pred))
 
 joblib.dump(model, 'model.pkl')
 joblib.dump(vectorizer, 'vec.pkl')
+
