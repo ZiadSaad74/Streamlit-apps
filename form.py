@@ -65,7 +65,7 @@ if submit:
         st.markdown(f"💡 AI courses Suggestion: **{llm_result}**")
 
         try:
-            creds = Credentials.from_service_account_file("C:/Users/ziad.saad/Desktop/cities/focal-welder-386600-55fd36951c74.json") 
+            creds = Credentials.from_service_account_file("focal-welder-386600-55fd36951c74.json") 
             client = gspread.authorize(creds)
             sheet = client.open("interns").sheet1
 
