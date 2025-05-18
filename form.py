@@ -65,6 +65,6 @@ if submit:
             st.success(f"✅ Great! Your selected program **{selected_course}** matches your job title.")
 
         # LLM output
-        st.markdown("### 🤖 LLM Suggestion")
+        st.markdown("### 🤖 Course Suggestion by AI")
         result = ask_llm(original_job_title, job_descriptions)
-        st.info(f"**Suggested Course (via LLM):** {result}")
+        st.info(f"**Suggested Course: ** {result}")
