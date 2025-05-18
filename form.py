@@ -69,6 +69,9 @@ if submit:
             client = gspread.authorize(creds)
             sheet = client.open("interns").sheet1
 
+            if len(sheet.get_all_values()) == 0:
+                sheet.insert_row(["Registration Date", "Name", "DOB", "Education Status", "Major", "Job Title", "Selected Course", "Prediction", "LLM Result"], 1)
+
             sheet.append_row([
                 str(datetime.date.today()), name, str(dob), education_status, major,
                 job_title, selected_course, prediction, llm_result
