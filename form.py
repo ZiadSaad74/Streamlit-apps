@@ -1,85 +1,70 @@
 import streamlit as st
 import joblib
+from model_functions import clean_text, ask_llm, job_descriptions, stop_words
 import datetime
 import pandas as pd
-import gspread
-from google.oauth2.service_account import Credentials
-from model_functions import clean_text, ask_llm, job_descriptions
 
-model = joblib.load("model.pkl")
-vectorizer = joblib.load("vec.pkl")
+# Load the model and vectorizer
+model = joblib.load("model.pkl")  
+vectorizer = joblib.load("vec.pkl")  
 
-programs = ["Dentistry", "HR", "Internship-pharma", "PMO", "Quality", "Software", "Physiotherapy", "OPD Lead"]
-majors = sorted([
-    "Computer Science", "Data Science", "Artificial Intelligence", "Cybersecurity", "Software Engineering",
-    "Electronics & Communications Engineering", "Civil Engineering", "Architecture", "Mechatronics",
-    "Veterinary & Animal Science", "Biomedical Engineering", "Nanotechnology", "Medicine", "Dentistry",
-    "Pharmacy", "Nursing", "Physiotherapy", "Medical Laboratory Sciences", "Radiology",
-    "Nutrition & Dietetics", "Public Health", "Business Administration", "Accounting", "Finance",
-    "Marketing", "Human Resources Management", "Entrepreneurship", "International Business", "Economics",
-    "Supply Chain Management", "E-Commerce", "Psychology", "Political Science", "Anthropology",
-    "Media & Communication Studies", "Graphic Design", "Interior Design", "Photography", "Law",
-    "International Relations", "Public Administration", "Primary Education", "Special Education",
-    "Educational Technology", "Curriculum & Instruction", "Educational Leadership", "Social Work",
-    "Criminology", "Human Development", "Agricultural Sciences", "Food Science & Technology",
-    "Hotel and Tourism Management"
-])
+# Dropdown options
+programs = ["Dentistry", "HR", "Internship-pharma", "pmo", "Quality", "Software", "Physiotherapy", "opd lead"]
+majors = ["Computer Science", "Data Science", "Artificial Intelligence", "Cybersecurity", "Software Engineering",
+          "Electronics & Communications Engineering", "Civil Engineering", "Architecture", "Mechatronics", 
+          'Veterinary & Animal Science', "Biomedical Engineering", "Nanotechnology", "Medicine", "Dentistry", 
+          "Pharmacy", "Nursing", "Physiotherapy", "Medical Laboratory Sciences", "Radiology", 
+          "Nutrition & Dietetics", "Public Health", "Business Administration", "Accounting", "Finance", 
+          "Marketing", "Human Resources Management", "Entrepreneurship", "International Business", "Economics", 
+          "Supply Chain Management", "E-Commerce", "Psychology", "Political Science", "Anthropology", 
+          "Media & Communication Studies", "Graphic Design", "Interior Design", "Photography", "Law", 
+          "International Relations", "Public Administration", "Primary Education", "Special Education", 
+          "Educational Technology", "Curriculum & Instruction", "Educational Leadership", "Social Work", 
+          "Criminology", "Human Development", "Agricultural Sciences", "Food Science & Technology", 
+          "Hotel and Tourism Management"]
+majors.sort()
 majors.append("Other")
 
-st.set_page_config(page_title="Internship Recommendation", layout="centered")
-st.title("🎓 Internship Programs Recommendation System")
-st.markdown("Please fill out the form to check if your job title matches the selected internship program.")
+# Title
+st.markdown("## 🎯 Internship Program Recommendation System")
+st.markdown("Fill in the details below to get a suitable match for your job title.")
 
-with st.form("intern_form"):
+# Form
+with st.form("course_form"):
     col1, col2 = st.columns(2)
     with col1:
-        name = st.text_input("👤 Full Name", max_chars=150)
-        dob = st.date_input("📅 Date of Birth", min_value=datetime.date(1980,1,1), max_value=datetime.date.today())
-        education_status = st.selectbox("🎓 Education Status", ['Graduated', "Student"])
+        name = st.text_input("👤 Name", placeholder="Enter your full name", max_chars=150)
+        education_status = st.selectbox("🎓 Education status", options=['Graduated', "Student"])
+        major = st.selectbox("📘 Your Major", majors)
     with col2:
-        major = st.selectbox("📚 Major", majors)
-        job_title = st.text_input("💼 Job Title", max_chars=100)
-        selected_course = st.selectbox("📌 Select Internship Program", programs)
+        age = st.date_input("🎂 Date of birth", help="Enter your date of birth", min_value=datetime.date(1980, 1, 1), max_value=datetime.date.today())
+        job_title = st.text_input("💼 Job Title", placeholder="Enter your job title", max_chars=100)
+        selected_course = st.selectbox("🎯 Select your preferred internship program", programs)
 
-    submit = st.form_submit_button("Submit")
+    submit = st.form_submit_button("🚀 Submit")
 
+# Submission Logic
 if submit:
-    if not all([name, dob, education_status, major, job_title, selected_course]):
+    if not all([name, age, education_status, major, job_title, selected_course]):
         st.error("⚠️ All fields are required.")
     else:
-        cleaned_title = clean_text(job_title)
+        original_job_title = job_title
+        cleaned_title = clean_text(str(job_title))
         job_title_vector = vectorizer.transform([cleaned_title])
         prediction = model.predict(job_title_vector)[0]
-        llm_result = ask_llm(job_title, job_descriptions)
 
         st.markdown("---")
-        st.subheader("### 📋 Result Summary")
+        st.markdown("### 📋 Result Summary")
 
-        if prediction.lower() == selected_course.lower():
-            st.success(f"✅ Matched! Your job title fits the selected program: **{selected_course}**.")
-        elif prediction.lower() == "not match":
-            st.warning(f"❌ No match found for your job title.")
+        if prediction.lower() != selected_course.lower():
+            if prediction.lower() == "not match":
+                st.error("❌ No matching internship found for this job title.")
+            else:
+                st.warning(f"❌ Not matched with selected course.\n\n✅ Best match: **{prediction}**")
         else:
-            st.info(f"🔎 Not matched with selected course. But model suggests: **{prediction}**")
+            st.success(f"✅ Great! Your selected program **{selected_course}** matches your job title.")
 
-        st.markdown("### 🤖 AI courses Suggestion")
+        # LLM output
+        st.markdown("### 🤖 LLM Suggestion")
         result = ask_llm(original_job_title, job_descriptions)
-        st.info(f"**Suggested Course (via AI):** {result}")
-
-        # try:
-        #     scopes = ["https://www.googleapis.com/auth/spreadsheets"]
-        #     creds = Credentials.from_service_account_file("focal-welder-386600-6c0e72884204.json", scopes=scopes) 
-        #     client = gspread.authorize(creds)
-        #     sheet = client.open("interns").sheet1
-
-        #     if len(sheet.get_all_values()) == 0:
-        #         sheet.insert_row(["Registration Date", "Name", "DOB", "Education Status", "Major", "Job Title", "Selected Course", "Prediction", "LLM Result"], 1)
-
-        #     sheet.append_row([
-        #         str(datetime.date.today()), name, str(dob), education_status, major,
-        #         job_title, selected_course, prediction, llm_result
-        #     ])
-
-        #     st.success("✅ Your data has been saved successfully!")
-        # except Exception as e:
-        #     st.error(f"Error saving to Google Sheet: {e}")
+        st.info(f"**Suggested Course (via LLM):** {result}")
